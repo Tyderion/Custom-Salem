@@ -50,6 +50,15 @@ public class Timer {
 	TimerController.getInstance().save();
     }
     
+    
+    public void add() {
+    	 Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
+   	    String str = "Test Test Test";
+   	    new Label(Coord.z, wnd, str);
+   	    wnd.justclose = true;
+   	    wnd.pack();
+    }
+    
     public synchronized boolean update(){
 	long now = System.currentTimeMillis();
 	mseconds = (time - now + local - (server - start)/SERVER_RATIO);

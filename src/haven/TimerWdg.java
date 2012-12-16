@@ -8,7 +8,7 @@ public class TimerWdg extends Widget {
     static Tex bg = Resource.loadtex("gfx/hud/bosq");
     private Timer timer;
     public Label time, name;
-    private Button start, stop, delete;
+    private Button start, stop, delete, add;
     
     public TimerWdg(Coord c, Widget parent, Timer timer) {
 	super(c, bg.sz(), parent);
@@ -31,12 +31,15 @@ public class TimerWdg extends Widget {
 	start = new Button(new Coord(90,2), 50, this, "start");
 	stop = new Button(new Coord(90,2), 50, this, "stop");
 	delete = new Button(new Coord(90,21), 50, this, "delete");
+	add = new Button(new Coord(150,2), 50, this, "add");
+
 	updbtns();
     }
     
     private void updbtns(){
 	start.visible = !timer.isWorking();
 	stop.visible = timer.isWorking();
+	add.visible = timer.isWorking();
     }
     
     @Override
@@ -68,6 +71,10 @@ public class TimerWdg extends Widget {
 	    timer.destroy();
 	    TimerController.getInstance().save();
 	    ui.destroy(this);
+	} else if(sender == add) {
+		timer.add();
+		
+		
 	} else {
 	    super.wdgmsg(sender, msg, args);
 	}
