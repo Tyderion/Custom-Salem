@@ -79,8 +79,15 @@ public class TimerController extends Thread {
 			try{
 			    long start = Long.parseLong(tmp[0]);
 			    long time = Long.parseLong(tmp[1]);
+			    ArrayList<Long> additionals = new ArrayList<Long>();
+			    if (tmp.length > 2) {
+				    for (int i = 0; i < Integer.parseInt(tmp[2]); i++) {
+				    	additionals.add(Long.parseLong(tmp[3+i]));
+				    }
+			    }
 			    String name = options.getProperty(str+"Name");
-			    new Timer(start, time, name);
+			    new Timer(start, time, name, additionals);
+
 			} catch(Exception e){e.printStackTrace();}
 		    }
 		}
@@ -91,21 +98,27 @@ public class TimerController extends Thread {
     }
 
     public void save(){
-	int i=0;
-	synchronized(options){
-	    options.clear();
-	    synchronized (timers){
-		for (Timer timer : timers){
-		    options.setProperty("Timer"+i, String.format("%d,%d",timer.getStart(), timer.getTime()));
-		    options.setProperty("Timer"+i+"Name", timer.getName());
-		    i++;
-		}
-	    }
-	    try {
-		options.store(new FileOutputStream(config), "Timers config");
-	    } catch (FileNotFoundException e) {
-	    } catch (IOException e) {
-	    }
-	}
-    }
+    	int i=0;
+    	synchronized(options){
+    	    options.clear();
+    	    synchronized (timers){
+    		for (Timer timer : timers){
+    		    String store = String.format("%d,%d",timer.getStart(), timer.getTime());
+    		    List<Long> additionals = timer.getAdditionalStarts();
+    		    store += String.format(",%d", additionals.size());
+    		    for (Long astart  : additionals) {
+    		    	store += String.format(",%d",astart);
+    		    }
+    		    options.setProperty("Timer"+i,store);
+    		    options.setProperty("Timer"+i+"Name", timer.getName());
+    		    i++;
+    		}
+    	    }
+    	    try {
+    		options.store(new FileOutputStream(config), "Timers config");
+    	    } catch (FileNotFoundException e) {
+    	    } catch (IOException e) {
+    	    }
+    	}
+        }
 }

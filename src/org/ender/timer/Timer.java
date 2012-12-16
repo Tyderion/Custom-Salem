@@ -1,5 +1,9 @@
 package org.ender.timer;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import haven.Coord;
 import haven.Label;
 import haven.UI;
@@ -17,20 +21,30 @@ public class Timer {
     public static long local;
     
     private long start;
+    
+    private List<Long> additional_starts;
     private long time;
     private String name;
     private long mseconds;
     public Callback updcallback;
     
+    
+    
+    
+    public Timer(long start, long time, String name, List<Long> additional_starts){
+    	this.start = start;
+    	this.time = time;
+    	this.name = name;
+    	this.additional_starts = additional_starts;
+    	TimerController.getInstance().add(this);
+    }
+    
     public Timer(long start, long time, String name){
-	this.start = start;
-	this.time = time;
-	this.name = name;
-	TimerController.getInstance().add(this);
+    	this(start, time, name, new ArrayList<Long>());
     }
     
     public Timer(long time, String name){
-	this(0, time, name);
+	this(0, time, name, new ArrayList<Long>());
     }
     
     public boolean isWorking(){
@@ -39,6 +53,9 @@ public class Timer {
     
     public void stop(){
 	start = 0;
+	if (additional_starts.size() > 0) {
+		start = additional_starts.remove(0);	
+	}
 	if(updcallback != null){
 	    updcallback.run(this);
 	}
@@ -51,22 +68,38 @@ public class Timer {
     }
     
     
-    public void add() {
-    	 Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
-   	    String str = "Test Test Test";
-   	    new Label(Coord.z, wnd, str);
-   	    wnd.justclose = true;
-   	    wnd.pack();
+    public synchronized void add() {
+   	    long new_start = server + SERVER_RATIO*(System.currentTimeMillis() - local);
+   	    additional_starts.add(new_start);
+   	    TimerController.getInstance().save();
+   	    Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
+	    String str = "Added new start at "+toString();
+	    new Label(Coord.z, wnd, str);
+	    wnd.justclose = true;
+	    wnd.pack();
     }
     
     public synchronized boolean update(){
 	long now = System.currentTimeMillis();
 	mseconds = (time - now + local - (server - start)/SERVER_RATIO);
+	
+	
+	
 	if(mseconds <= 0){
 	    Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
 	    String str;
+	    //start = additional_starts.get(0);
 	    if(mseconds < -1500){
-		str = String.format("%s elapsed since timer named \"%s\"  finished it's work", toString(), name);
+	    	int number_of_finisheds = 0;
+	    		for (Iterator<Long> it = additional_starts.iterator(); it.hasNext(); ) {
+	    		    Long a_start = it.next();
+	    		    if ((time - now + local - (server - a_start)/SERVER_RATIO) < -1500) {
+	    		    	it.remove();
+	    		    }
+		    			number_of_finisheds++;
+		    		}
+	    		
+		str = String.format("%s elapsed since timer named \"%s\"  finished it's work %s x", toString(), name, number_of_finisheds+1);
 	    } else {
 		str = String.format("Timer named \"%s\" just finished it's work", name);
 	    }
@@ -100,6 +133,11 @@ public class Timer {
     public synchronized long getTime()
     {
 	return time;
+    }
+    
+    public synchronized List<Long> getAdditionalStarts()
+    {
+    	return additional_starts;
     }
 
     @Override
