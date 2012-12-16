@@ -23,6 +23,9 @@ public class Timer {
     private long start;
     
     private List<Long> additional_starts;
+    
+   
+    
     private long time;
     private String name;
     private long mseconds;
@@ -37,6 +40,7 @@ public class Timer {
     	this.name = name;
     	this.additional_starts = additional_starts;
     	TimerController.getInstance().add(this);
+    	
     }
     
     public Timer(long start, long time, String name){
@@ -90,16 +94,16 @@ public class Timer {
 	    String str;
 	    //start = additional_starts.get(0);
 	    if(mseconds < -1500){
-	    	int number_of_finisheds = 0;
+	    	int number_of_finished_timers = 0;
 	    		for (Iterator<Long> it = additional_starts.iterator(); it.hasNext(); ) {
 	    		    Long a_start = it.next();
 	    		    if ((time - now + local - (server - a_start)/SERVER_RATIO) < -1500) {
 	    		    	it.remove();
 	    		    }
-		    			number_of_finisheds++;
+		    			number_of_finished_timers++;
 		    		}
 	    		
-		str = String.format("%s elapsed since timer named \"%s\"  finished it's work %s x", toString(), name, number_of_finisheds+1);
+		str = String.format("%s elapsed since timer named \"%s\"  finished it's work %sx", toString(), name, number_of_finished_timers+1);
 	    } else {
 		str = String.format("Timer named \"%s\" just finished it's work", name);
 	    }
