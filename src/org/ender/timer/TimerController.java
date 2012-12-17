@@ -65,6 +65,9 @@ public class TimerController extends Thread {
 			timers.remove(timer);
 		}
 	}
+	
+	
+
 
 	public void load() {
 		synchronized (options) {
@@ -76,19 +79,8 @@ public class TimerController extends Thread {
 
 					for (Object key : options.keySet()) {
 						String str = key.toString();
-						String hash_key = str.split("_")[0] + str.split("_")[1];
-						List<String> property_list;
-						if (parsed_timers.containsKey(hash_key)) {
-							property_list = parsed_timers.get(hash_key);
-						} else {
-							property_list = new ArrayList<String>();
-						}
-						property_list.add(options.getProperty(str));
-						parsed_timers.put(hash_key, property_list);
-					}
-					for (List<String> timer : parsed_timers.values())
-					{
-						new Timer(timer);
+						String prefix = str.split("_")[0];
+						
 					}
 				}
 			} catch (FileNotFoundException e) {
@@ -96,26 +88,23 @@ public class TimerController extends Thread {
 			}
 		}
 	}
-
+	
 	public void save() {
 		int i = 0;
 		synchronized (options) {
 			options.clear();
 			synchronized (timers) {
 				for (Timer timer : timers) {
-					int j = 0;
-					for (String option : timer.toStringList()) {
-						options.setProperty("Timer_" + i + "_" + j, option);
-						j++;
-					}
+					options.putAll(timer.toProperties("Timer" + i+"_"));
 					i++;
 				}
 			}
 			try {
-				options.store(new FileOutputStream(config), "Timers config");
+				options.store(new FileOutputStream(config), "Advanced Timers config");
 			} catch (FileNotFoundException e) {
 			} catch (IOException e) {
 			}
 		}
+
 	}
 }

@@ -1,11 +1,11 @@
 package org.ender.timer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.tyderion.timer.PropertiesGenerator;
 import org.tyderion.timer.TimerData;
 
 import haven.Coord;
@@ -75,6 +75,49 @@ public class Timer {
     	return properties;
     }
     
+    
+
+    
+    public Properties toProperties(String prefix) 
+    {
+    	PropertiesGenerator gen = new PropertiesGenerator(prefix);
+    	Properties props = new Properties();
+    	props.putAll(gen.toProperty("name", name));
+    	props.putAll(gen.toProperty("start", start));
+    	props.putAll(gen.toProperty("duration", duration));
+    	int i = 0;
+    	for (TimerData dat : data) {
+    		props.putAll(dat.toProperties(prefix+".substart"+i));
+    	}
+    	return props;
+    }
+    
+    public Timer(Properties properties, String prefix) {
+    	List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\.");
+    	for (String key : keys) 
+    	{
+    		String keyprops[] = key.split(".");
+    		data = new ArrayList<TimerData>();
+    		switch (keyprops[0]) {
+    				case "name":
+    					name = properties.getProperty(key);
+    					break;
+    				case "duration":
+    					duration = Long.valueOf(properties.getProperty(key));
+    					break;
+    				default:
+    					// If it is the start a subtask
+    					if (keyprops[1].matches("substart[0-9]*\\.start"))
+    					{
+    							data.add(new TimerData(properties, keyprops[0]+"."+keyprops[1]));
+    					}
+    					
+    		}
+    		
+    		
+    	}
+    }
+    
 
     
     public boolean isWorking(){
@@ -83,9 +126,7 @@ public class Timer {
     
     public void stop(){
 	start = 0;
-	if (additional_starts.size() > 0) {
-		start = additional_starts.remove(0);	
-	}
+	additional_starts = new ArrayList<Long>();
 	if(updcallback != null){
 	    updcallback.run(this);
 	}

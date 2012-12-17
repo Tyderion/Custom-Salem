@@ -1,34 +1,55 @@
 package org.tyderion.timer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 public class TimerData implements Comparable<TimerData>{
-	
-	
-	
-	
+
+
+	//Todo: Store location for use in map markers...?
 	private String suffix;
 	private long start;
-	
-	
-	public TimerData(long start, String suffix) 
+
+
+	public TimerData(long start, String suffix)
 	{
 		this.suffix = suffix;
 		this.start = start;
 	}
 
-	
+
 	public TimerData(String properties) {
 		String[] props = properties.split(",");
 		start = Long.parseLong(props[0]);
 		suffix = props[1];
 	}
-	
-	
+
+	public TimerData(Properties properties, String prefix) {
+		List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\.");
+    	for (String key : keys)
+    	{
+    		String keyprops[] = key.split(".");
+    		switch (keyprops[0]) {
+    				case "start":
+    					start =  Long.valueOf(properties.getProperty(key));
+    					break;
+    				case "suffix":
+    					suffix = properties.getProperty(key);
+    					break;
+    		}
+
+
+    	}
+	}
+
+
 	public String getSuffix() {
 		return suffix;
 	}
 	public void setSuffix(String suffix) {
 		this.suffix = suffix;
-		
+
 	}
 	public long getStart() {
 		return start;
@@ -42,7 +63,7 @@ public class TimerData implements Comparable<TimerData>{
 	    final int EQUAL = 0;
 	    final int AFTER = 1;
 	    // If identical start sort by suffix
-	    if (this.getStart() == that.getStart()) { 
+	    if (this.getStart() == that.getStart()) {
 	    		return this.getSuffix().compareTo(that.getSuffix());
 	    }
 		if (this.getStart() < that.getStart()) { return BEFORE; }
@@ -61,10 +82,19 @@ public class TimerData implements Comparable<TimerData>{
 	       ( this.getSuffix() == that.getSuffix() );
 	}
 
-	
+
 	@Override
 	public String toString() {
 		return String.valueOf(getStart())+","+getSuffix();
 				}
-	
+
+	public Properties toProperties(String prefix) {
+		PropertiesGenerator gen = new PropertiesGenerator(prefix);
+		Properties props = new Properties();
+		props.putAll(gen.toProperty("start", start));
+		props.putAll(gen.toProperty("suffix", suffix));
+		return props;
+
+	}
+
 }
