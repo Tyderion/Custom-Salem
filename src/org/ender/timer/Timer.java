@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.tyderion.timer.TimerData;
+
 import haven.Coord;
 import haven.Label;
 import haven.UI;
@@ -23,7 +25,7 @@ public class Timer {
     private long start;
     
     private List<Long> additional_starts;
-    
+    private List<TimerData> data;
    
     
     private long time;
@@ -86,8 +88,7 @@ public class Timer {
     public synchronized boolean update(){
 	long now = System.currentTimeMillis();
 	mseconds = (time - now + local - (server - start)/SERVER_RATIO);
-	
-	
+	long time_since_finish = mseconds;
 	
 	if(mseconds <= 0){
 	    Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
@@ -99,14 +100,15 @@ public class Timer {
 	    		    Long a_start = it.next();
 	    		    if ((time - now + local - (server - a_start)/SERVER_RATIO) < -1500) {
 	    		    	it.remove();
+	    		    	number_of_finished_timers++;
 	    		    }
-		    			number_of_finished_timers++;
+		    			
 		    		}
-	    		
-		str = String.format("%s elapsed since timer named \"%s\"  finished it's work %sx", toString(), name, number_of_finished_timers+1);
+		str = String.format("%s elapsed since timer named \"%s\"  finished it's work %sx", timeToString(time_since_finish), name, number_of_finished_timers+1);
 	    } else {
 		str = String.format("Timer named \"%s\" just finished it's work", name);
 	    }
+	    
 	    new Label(Coord.z, wnd, str);
 	    wnd.justclose = true;
 	    wnd.pack();
@@ -146,11 +148,15 @@ public class Timer {
 
     @Override
     public String toString() {
-	long t = Math.abs(isWorking()?mseconds:time)/1000;
-	int h = (int) (t/3600);
-	int m = (int) ((t%3600)/60);
-	int s = (int) (t%60);
-	return String.format("%d:%02d:%02d", h,m,s);
+    	return timeToString(isWorking()?mseconds:time);
+    }
+    
+    private String timeToString(long _time) {
+    	long time = Math.abs(_time)/1000;
+    	int h = (int) (time/3600);
+    	int m = (int) ((time%3600)/60);
+    	int s = (int) (time%60);
+    	return String.format("%d:%02d:%02d", h,m,s);
     }
     
     public void destroy(){
