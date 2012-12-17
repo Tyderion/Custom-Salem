@@ -38,21 +38,11 @@ public class Timer {
     
     
     
-    public Timer(long start, long time, String name, List<Long> additional_starts){
-    	this.start = start;
-    	this.duration = time;
-    	this.name = name;
-    	this.additional_starts = additional_starts;
-    	TimerController.getInstance().add(this);
-    	
-    }
-    
-    public Timer(long start, long time, String name){
-    	this(start, time, name, new ArrayList<Long>());
-    }
     
     public Timer(long time, String name){
-	this(0, time, name, new ArrayList<Long>());
+    	this.duration = time;
+    	this.name = name;
+    	TimerController.getInstance().add(this);
     }
     
     
