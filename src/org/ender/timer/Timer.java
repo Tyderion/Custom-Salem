@@ -1,6 +1,8 @@
 package org.ender.timer;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -20,6 +22,13 @@ public class Timer {
     }
 
     private static final int SERVER_RATIO = 3;
+    
+    private static final String NAME = "name";
+	private static final String DURATION = "duration";
+	private static final String START = "start";
+    private static final String SUFFIX = "suffix";
+    
+    
     
     public static long server;
     public static long local;
@@ -41,15 +50,32 @@ public class Timer {
     
     public Timer(long time, String name){
     	data =new ArrayList<TimerData>();
-    	this.duration = time;
-    	this.name = name;
-    	data.add(new TimerData(time, name));
-    	TimerController.getInstance().add(this);
+    	synchronized(data) {
+    		
+    		data.add(new TimerData(0, name));
+        	this.setDuration(time);
+        	this.setName(name);
+        	
+        	TimerController.getInstance().add(this);
+    	}
+    	
+
     }
     
-    
-    public Timer( List<String> properties )
+   
+    public long getDuration() {
+		return duration;
+	}
+
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+
+
+	public Timer( List<String> properties )
     {
+    	
     	data = new ArrayList<TimerData>();
     	for (String str : properties) {
     		String[] props = str.split(",");
@@ -81,51 +107,50 @@ public class Timer {
     
 
     
-    public Properties toProperties(String prefix) 
+    public synchronized Properties toProperties(String prefix) 
     {
     	PropertiesGenerator gen = new PropertiesGenerator(prefix);
     	Properties props = new Properties();
-    	props.putAll(gen.toProperty("name", name));
-//    	props.putAll(gen.toProperty("start", start));
-    	props.putAll(gen.toProperty("duration", duration));
+    	props.putAll(gen.toProperty(NAME, name));
+    	props.putAll(gen.toProperty(DURATION, duration));
     	int i = 0;
+    	
     	for (TimerData dat : data) {
-    		props.putAll(dat.toProperties(prefix+".start"+i));
+    		props.putAll(dat.toProperties(prefix+"."+START+i));
+    		i++;
     	}
     	return props;
     }
     
     public Timer(Properties properties, String prefix) {
-    	System.err.println("Getting keys for this timer");
-    	List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\..*");
-    	System.err.println("Keys are: "+keys);
+    	data = new ArrayList<TimerData>();
+    	synchronized(data) {
+    	
+    	List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\.(("+NAME+"|"+DURATION+")|"+START+".*\\.start)");
     	for (String key : keys) 
     	{
     		String keyprops[] = key.split("\\.");
-    		data = new ArrayList<TimerData>();
     		
-    		switch (keyprops[1]) {
-    				case "name":
+    		
+    		switch (keyprops[keyprops.length-1]) {
+    				case NAME:
     					name = properties.getProperty(key);
     					break;
-    				case "duration":
+    				case DURATION:
     					duration = Long.valueOf(properties.getProperty(key));
     					break;
-    				default:
+    				case START:
     					// If it is the start a subtask
-    					if (keyprops.length > 2)
-    					{
-	    					if (keyprops[2].matches("start"))
-	    					{
-	    							data.add(new TimerData(properties, keyprops[0]+"."+keyprops[1]));
-	    							System.err.println("Added TimerDAta o data list");
-	    					}
-    					}
+						data.add(new TimerData(
+								Long.valueOf(properties.getProperty(key)),
+								properties.getProperty(key.subSequence(0, key.length()-5)+SUFFIX)
+								));
+						
     					
     					
     		}
-    		
-    		
+    	}
+    	Collections.sort(data);
     	}
     	int a = 2;
     	if (a == 2) {
@@ -150,20 +175,22 @@ public class Timer {
     
     public void start(){
 	start = server + SERVER_RATIO*(System.currentTimeMillis() - local);
+	data.get(0).setStart(start);
 	TimerController.getInstance().save();
     }
     
     
     public synchronized void add() {
    	    long new_start = server + SERVER_RATIO*(System.currentTimeMillis() - local);
-   	    additional_starts.add(new_start);
-   	    data.add(new TimerData(1500, "Sufix"));
+   	    //additional_starts.add(new_start);
+    	data.add(new TimerData(new_start, "Suffix"));
+   	    
    	    TimerController.getInstance().save();
-   	    Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
-	    String str = "Added new start at "+toString();
-	    new Label(Coord.z, wnd, str);
-	    wnd.justclose = true;
-	    wnd.pack();
+   	    //Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
+	    String str = "Added new start "+timeToString(new_start-start);
+	    //new Label(Coord.z, wnd, str);
+	    //wnd.justclose = true;
+	    //wnd.pack();
     }
     
     public synchronized boolean update(){
@@ -202,7 +229,7 @@ public class Timer {
     }
     
     public synchronized long getStart() {
-        return start;
+        return data.get(0).getStart();
     }
 
     public synchronized void setStart(long start) {
@@ -246,6 +273,68 @@ public class Timer {
     public void destroy(){
 	TimerController.getInstance().remove(this);
 	updcallback = null;
+    }
+    
+    public int compareTo(Timer that) {
+		 final int BEFORE = -1;
+	    final int EQUAL = 0;
+	    final int AFTER = 1;
+	    // If identical start sort by suffix
+	    
+	    int basic_state = EQUAL;
+	    if (this.getName() == that.getName()) 
+	    {
+	    	if (this.getStart() == that.getStart())
+			{
+	    		if (this.getDuration() == that.getDuration())
+	    		{
+	    			basic_state = EQUAL;
+	    		} else {
+	    			basic_state = ((Long)this.getDuration()).compareTo(that.getDuration());
+	    		}
+	    		
+					
+			} else 
+			{
+				basic_state = ((Long)this.getStart()).compareTo(that.getStart());
+			}
+	    } else {
+
+	    	if (this.getStart() == that.getStart())
+			{    		
+	    		basic_state = ((Long)this.getDuration()).compareTo(that.getDuration());
+			}else 
+			{
+				basic_state = ((Long)this.getStart()).compareTo(that.getStart());
+			}
+	    }
+	    if (basic_state == EQUAL) 
+	    {
+	    	if (this.data.size() == that.data.size())
+	    	{
+	    		for (int i = 0; i < data.size();i++ )
+	    		{
+	    			basic_state = data.get(i).compareTo(that.data.get(i));
+	    			if (basic_state != EQUAL) { return basic_state;}
+	    		}
+	    		
+	    	}
+	    }
+
+		//assert this.equals(that) : "compareTo inconsistent with equals.";
+
+	    return basic_state;
+	}
+    
+    @Override
+    public boolean equals(Object obj) {
+    		try {
+    			return compareTo((Timer)obj)==0?true:false;
+    		}
+    		catch(ClassCastException e) {
+    			return false;
+    		}
+    		
     }
     
 }

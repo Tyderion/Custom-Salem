@@ -95,7 +95,7 @@ public class TimerController extends Thread {
 			options.clear();
 			synchronized (timers) {
 				for (Timer timer : timers) {
-					options.putAll(timer.toProperties("Timer" + i+"_"));
+					options.putAll(timer.toProperties("Timer" + i));
 					i++;
 				}
 			}
@@ -103,6 +103,10 @@ public class TimerController extends Thread {
 				options.store(new FileOutputStream(config), "Advanced Timers config");
 			} catch (FileNotFoundException e) {
 			} catch (IOException e) {
+				
+			}
+			catch (Exception e) {
+				System.err.println("STUPID NULLPOINTERS IN CONFIG XD");
 			}
 		}
 

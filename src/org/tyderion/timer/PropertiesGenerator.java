@@ -67,6 +67,8 @@ public class PropertiesGenerator {
     public static List<String> getMatchingEntries(Set<Object> set, String regex) 
     {
       Iterator<Object> it =set.iterator();
+      
+      System.err.println("regex: "+regex);
 
       List<String> strings = new ArrayList<String>();
       while(it.hasNext()) 

@@ -29,9 +29,7 @@ public class TimerData implements Comparable<TimerData>{
 	}
 
 	public TimerData(Properties properties, String prefix) {
-		System.err.println("Creating TimerData with prefix: "+prefix);
-		List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\..*");
-		System.err.println("Grabbed keys: "+keys);
+		List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\.(start|suffix)");
     	for (String key : keys)
     	{
     		String keyprops[] = key.split("\\.");
@@ -94,7 +92,7 @@ public class TimerData implements Comparable<TimerData>{
 
 	@Override
 	public String toString() {
-		return String.valueOf(getStart())+","+getSuffix();
+		return "TimerData:( "+String.valueOf(getStart())+","+getSuffix()+")";
 				}
 
 	public Properties toProperties(String prefix) {
