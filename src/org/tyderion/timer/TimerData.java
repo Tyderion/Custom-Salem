@@ -1,7 +1,10 @@
 package org.tyderion.timer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class TimerData implements Comparable<TimerData>{
@@ -26,21 +29,27 @@ public class TimerData implements Comparable<TimerData>{
 	}
 
 	public TimerData(Properties properties, String prefix) {
-		List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\.");
+		System.err.println("Creating TimerData with prefix: "+prefix);
+		List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\..*");
+		System.err.println("Grabbed keys: "+keys);
     	for (String key : keys)
     	{
-    		String keyprops[] = key.split(".");
-    		switch (keyprops[0]) {
-    				case "start":
-    					start =  Long.valueOf(properties.getProperty(key));
-    					break;
-    				case "suffix":
-    					suffix = properties.getProperty(key);
-    					break;
+    		String keyprops[] = key.split("\\.");
+    		if (keyprops.length > 0)
+    		{
+    			switch (keyprops[keyprops.length-1]) {
+	    				case "start":
+	    					start =  Long.valueOf(properties.getProperty(key));
+	    					break;
+	    				case "suffix":
+	    					suffix = properties.getProperty(key);
+	    					break;
+    			}
     		}
 
 
     	}
+    	int a = 2;
 	}
 
 

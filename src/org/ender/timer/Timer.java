@@ -40,14 +40,17 @@ public class Timer {
     
     
     public Timer(long time, String name){
+    	data =new ArrayList<TimerData>();
     	this.duration = time;
     	this.name = name;
+    	data.add(new TimerData(time, name));
     	TimerController.getInstance().add(this);
     }
     
     
     public Timer( List<String> properties )
     {
+    	data = new ArrayList<TimerData>();
     	for (String str : properties) {
     		String[] props = str.split(",");
     		if (props.length == 1) {
@@ -83,22 +86,25 @@ public class Timer {
     	PropertiesGenerator gen = new PropertiesGenerator(prefix);
     	Properties props = new Properties();
     	props.putAll(gen.toProperty("name", name));
-    	props.putAll(gen.toProperty("start", start));
+//    	props.putAll(gen.toProperty("start", start));
     	props.putAll(gen.toProperty("duration", duration));
     	int i = 0;
     	for (TimerData dat : data) {
-    		props.putAll(dat.toProperties(prefix+".substart"+i));
+    		props.putAll(dat.toProperties(prefix+".start"+i));
     	}
     	return props;
     }
     
     public Timer(Properties properties, String prefix) {
-    	List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\.");
+    	System.err.println("Getting keys for this timer");
+    	List<String> keys = PropertiesGenerator.getMatchingEntries(properties.keySet(), prefix+"\\..*");
+    	System.err.println("Keys are: "+keys);
     	for (String key : keys) 
     	{
-    		String keyprops[] = key.split(".");
+    		String keyprops[] = key.split("\\.");
     		data = new ArrayList<TimerData>();
-    		switch (keyprops[0]) {
+    		
+    		switch (keyprops[1]) {
     				case "name":
     					name = properties.getProperty(key);
     					break;
@@ -107,14 +113,23 @@ public class Timer {
     					break;
     				default:
     					// If it is the start a subtask
-    					if (keyprops[1].matches("substart[0-9]*\\.start"))
+    					if (keyprops.length > 2)
     					{
-    							data.add(new TimerData(properties, keyprops[0]+"."+keyprops[1]));
+	    					if (keyprops[2].matches("start"))
+	    					{
+	    							data.add(new TimerData(properties, keyprops[0]+"."+keyprops[1]));
+	    							System.err.println("Added TimerDAta o data list");
+	    					}
     					}
+    					
     					
     		}
     		
     		
+    	}
+    	int a = 2;
+    	if (a == 2) {
+    		//Do Nothing
     	}
     }
     
@@ -142,6 +157,7 @@ public class Timer {
     public synchronized void add() {
    	    long new_start = server + SERVER_RATIO*(System.currentTimeMillis() - local);
    	    additional_starts.add(new_start);
+   	    data.add(new TimerData(1500, "Sufix"));
    	    TimerController.getInstance().save();
    	    Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
 	    String str = "Added new start at "+toString();

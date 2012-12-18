@@ -38,18 +38,17 @@ public class PropertiesGenerator {
         {
         	rkey = propertyKeyOf(key.toString());
         }
-    	
     	if (value.getClass().equals(String.class)) {
     		rvalue = (String)value;
     	} 
-    	else if (value.getClass().equals(Long.TYPE))
+    	else if (value.getClass().equals(Long.class))
     	{
     		rvalue = String.valueOf((long)value);
     	} 
-    	else if (value.getClass().equals(Integer.TYPE))
+    	else if (value.getClass().equals(Integer.class))
     	{
     		rvalue = String.valueOf((int)value);
-    	} 
+    	}
 
     	Properties props = new Properties();
     	props.setProperty(rkey, rvalue);
@@ -73,8 +72,7 @@ public class PropertiesGenerator {
       while(it.hasNext()) 
       {
         String next = (String)it.next();
-        
-        if(Pattern.matches(regex, next)) {
+        if(next.matches(regex)) {
         	strings.add(next);
         }
       }
