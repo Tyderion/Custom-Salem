@@ -244,14 +244,6 @@ public class Utils {
 	}
     }
     
-    static float getpreff(String prefname, float def) {
-	try {
-	    return(prefs().getFloat(prefname, def));
-	} catch(SecurityException e) {
-	    return(def);
-	}
-    }
-    
     public static String getprop(String propname, String def) {
 	try {
 	    return(System.getProperty(propname, def));
