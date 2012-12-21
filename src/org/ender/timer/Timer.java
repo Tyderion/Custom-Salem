@@ -161,7 +161,7 @@ public class Timer {
 
     @Override
     public String toString() {
-	return Timer.timeToString(Math.abs(isWorking()?mseconds:duration)/1000);
+	return Timer.timeToString(Math.abs(isWorking()?mseconds:duration));
     }
     
     public static String timeToString(long _time) {
