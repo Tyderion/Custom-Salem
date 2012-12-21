@@ -1,5 +1,6 @@
 package org.tyderion.timer;
 
+import java.io.File;
 import java.util.Properties;
 
 import org.ender.timer.Timer;
@@ -11,12 +12,18 @@ public class TestClas {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Timer t = new AdvancedTimer(5000,"name", "suffix");
-		System.out.println(t.debug());
-		for (Timer e : TimerController.getInstance().timers)
-		{
-			System.out.println(((AdvancedTimer)e).toProperties("prefix"));
-		}
+		AdvancedTimerController.init(new File("C:\\Users\\Archie\\Salem"), "jamestown.seatribe.se");
+		System.out.println(AdvancedTimerController.getInstance().timers);
+		AdvancedTimer t = new AdvancedTimer(6000,"name4", "suffix4");
+		t.start();
+
+		AdvancedTimerController.getInstance().save();
+//		System.out.println(t.debug());
+//		for (Timer e : TimerController.getInstance().timers)
+//		{
+//			System.out.println(((AdvancedTimer)e).toProperties("prefix"));
+//		}
+//		
 //		t.start();
 //		Properties s= t.toProperties("prefix");
 //		

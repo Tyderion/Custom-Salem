@@ -37,6 +37,7 @@ import java.util.*;
 
 import org.ender.wiki.Item;
 import org.ender.wiki.Wiki;
+import org.tyderion.timer.AdvancedTimerPanel;
 
 public class MenuGrid extends Widget {
     public final Pagina next = paginafor(Resource.load("gfx/hud/sc-next"));
@@ -386,7 +387,7 @@ public class MenuGrid extends Widget {
 	    System.arraycopy(ad, 2, args, 0, args.length);
 	    ui.gui.wdgmsg("act", (Object[])args);
 	} else if(ad[1].equals("timers")) {
-	    TimerPanel.toggle();
+	    AdvancedTimerPanel.toggle();
 	} else if(ad[1].equals("wiki")) {
 	    WikiBrowser.toggle();
 	}

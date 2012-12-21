@@ -30,8 +30,9 @@ public class Timer {
     protected long mseconds;
     public Callback updcallback;
     
-    
-    
+    public Timer() {
+    	
+    }
     
     public Timer(long start, long time, String name, List<Long> additional_starts){
     	setStart(start);

@@ -87,7 +87,7 @@ public class Session {
     String username;
     byte[] cookie;
     final Map<Integer, CachedRes> rescache = new TreeMap<Integer, CachedRes>();
-    public final Glob glob;
+    public static Glob glob;
     public byte[] sesskey;
 	
     @SuppressWarnings("serial")

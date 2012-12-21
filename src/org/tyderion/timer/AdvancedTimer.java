@@ -1,7 +1,6 @@
 package org.tyderion.timer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +12,9 @@ import org.tyderion.timer.TimerData;
 
 import haven.Coord;
 import haven.Label;
+import haven.ActAudio.Ambience.Glob;
+import haven.Party.Member;
+import haven.Session;
 import haven.UI;
 import haven.Window;
 
@@ -27,7 +29,8 @@ public class AdvancedTimer extends Timer{
     private static final String NAME = "name";
 	private static final String DURATION = "duration";
 	private static final String START = "start";
-    private static final String SUFFIX = "suffix";
+	private static final String SUFFIX = "suffix";
+    private static final String COORD = "coords";
     
    
    
@@ -35,15 +38,30 @@ public class AdvancedTimer extends Timer{
     
 	public AdvancedTimer(long time, String name, String suffix){
 
-	super(0,time,name);
+	super();
 	data =new ArrayList<TimerData>();
 	synchronized(data) {
-		
-		data.add(new TimerData(0, suffix));
     	this.setDuration(time);
     	this.setName(name);
+		data.add(new TimerData(0, suffix, new Coord(0,0)));
+
 	}
+	AdvancedTimerController.getInstance().add(this);
 	}
+	
+    public boolean isWorking(){
+    	synchronized(data) 
+    	{
+    		if (data.size() > 0) 
+        	{
+        		return data.get(0).getStart()  != 0;
+        	}
+        	else 
+        	{
+        		return false;
+        	}
+    	}
+    }
     
     public synchronized Properties toProperties(String prefix) 
     {
@@ -61,7 +79,6 @@ public class AdvancedTimer extends Timer{
     }
     
     public AdvancedTimer(Properties properties, String prefix) {
-    	super(0, "test");
     	data = new ArrayList<TimerData>();
     	synchronized(data) {
     	
@@ -80,28 +97,30 @@ public class AdvancedTimer extends Timer{
     					break;
     				case START:
     					// If it is the start a subtask
-						data.add(new TimerData(
-								Long.valueOf(properties.getProperty(key)),
-								properties.getProperty(key.subSequence(0, key.length()-5)+SUFFIX)
-								));
+						data.add(new TimerData(properties, key.substring(0, key.length()-START.length()-1)));
+						int a = 2;
 						
     					
     					
     		}
     	}
     	Collections.sort(data);
+    	if (data.size() > 0)
+    	{
+    		start = data.get(0).getStart();
     	}
     	int a = 2;
-    	if (a == 2) {
-    		//Do Nothing
+    	AdvancedTimerController.getInstance().add(this);
     	}
+
+    	List<AdvancedTimer> t = AdvancedTimerController.getInstance().timers;
     }
     
 
    
     
-    public void stop(){
-    super.stop();
+    public void stop(){    	
+    setStart(0);
     data = new ArrayList<TimerData>();
 	AdvancedTimerController.getInstance().save();
     }
@@ -113,16 +132,21 @@ public class AdvancedTimer extends Timer{
     }
     
     public void start(){
-    super.start();
-    String suffix = askForString();
-    setStart(start, suffix);
+    data = new ArrayList<TimerData>();
+    data.add(new TimerData(toServerTime(System.currentTimeMillis()), askForString(), Session.glob.party.leader.c));
+    start = data.get(0).getStart();
 	AdvancedTimerController.getInstance().save();
     }
     
     
     public synchronized void add() {
    	    long new_start = toServerTime(System.currentTimeMillis());
-    	data.add(new TimerData(new_start, askForString()));
+   	    Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
+	   	new Label(Coord.z, wnd, Session.glob.party.leader.c.toString());
+	    wnd.justclose = true;
+	    wnd.pack();
+   	    System.err.println(Session.glob.party.leader.c);
+    	data.add(new TimerData(new_start, askForString(), Session.glob.party.leader.c));
     	AdvancedTimerController.getInstance().save();
     }
     
@@ -169,7 +193,7 @@ public class AdvancedTimer extends Timer{
     public synchronized void setStart(long start, String suffix) {
     	super.setStart(start);
     	data = new ArrayList<TimerData>();
-    	data.add(new TimerData(start, suffix));
+    	data.add(new TimerData(start, suffix, new Coord(0,0)));
     }
     public synchronized void setStart(long start) {
         setStart(start, "");
@@ -237,6 +261,15 @@ public class AdvancedTimer extends Timer{
     			return false;
     		}
     		
+    }
+    
+    public String toString() {
+    	return data.get(0).toString();
+    }
+    
+    
+    public String debug() {
+    	return "Name: "+getName()+", duration: "+getDuration()+", start: "+getStart()+", number of starts: "+data.size();
     }
     
 }

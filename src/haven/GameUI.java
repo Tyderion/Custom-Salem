@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.ender.timer.TimerController;
+import org.tyderion.timer.AdvancedTimerController;
 
 public class GameUI extends ConsoleHost implements Console.Directory {
     public final String chrid;
@@ -149,7 +150,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	    });
 	opts = new OptWnd(sz.sub(200, 200).div(2), this);
 	opts.hide();
-	TimerController.init(Config.getFile(), Config.server);
+	AdvancedTimerController.init(Config.getFile(), Config.server);
 	makemenu();
 	resize(sz);
     }

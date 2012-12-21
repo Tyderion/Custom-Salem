@@ -31,7 +31,7 @@ import java.awt.Color;
 
 public class Party {
     Map<Long, Member> memb = new TreeMap<Long, Member>();
-    Member leader = null;
+    public Member leader = null;
     public static final int PD_LIST = 0;
     public static final int PD_LEADER = 1;
     public static final int PD_MEMBER = 2;
@@ -43,7 +43,7 @@ public class Party {
 	
     public class Member {
 	long gobid;
-	private Coord c = null;
+	public Coord c = null;
 	Color col = Color.BLACK;
 	
 	public Gob getgob() {
