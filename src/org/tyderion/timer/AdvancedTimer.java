@@ -110,7 +110,7 @@ public class AdvancedTimer extends Timer{
     
     
     public String askForString() {
-    	
+    	//TODO Implement a window which asks for a string
     	return "";
     }
     
@@ -124,16 +124,8 @@ public class AdvancedTimer extends Timer{
     
     public synchronized void add() {
    	    long new_start = toServerTime(System.currentTimeMillis());
-   	    //additional_starts.add(new_start);
-   	    
     	data.add(new TimerData(new_start, askForString()));
-   	    
     	AdvancedTimerController.getInstance().save();
-   	    //Window wnd = new Window(new Coord(250,100), Coord.z, UI.instance.root, name);
-	    String str = "Added new start "+timeToString(new_start-start);
-	    //new Label(Coord.z, wnd, str);
-	    //wnd.justclose = true;
-	    //wnd.pack();
     }
     
     public synchronized boolean update(){

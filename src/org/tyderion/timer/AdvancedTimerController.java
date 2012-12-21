@@ -18,6 +18,13 @@ public class AdvancedTimerController extends TimerController {
 	private static File config;
 	private Properties options;
 
+	public static AdvancedTimerController getInstance() {
+		if (instance == null) {
+			instance = new AdvancedTimerController();
+		}
+		return (AdvancedTimerController)instance;
+	}
+
 	public AdvancedTimerController() {
 		super();
 		options = new Properties();
