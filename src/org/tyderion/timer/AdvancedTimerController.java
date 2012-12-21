@@ -28,9 +28,6 @@ public class AdvancedTimerController extends TimerController {
 	public AdvancedTimerController() {
 		super();
 		options = new Properties();
-		timers = new ArrayList<Timer>();
-		setDaemon(true);
-		start();
 	}
 
 	public static void init(File folder, String server) {

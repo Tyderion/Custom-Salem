@@ -32,20 +32,18 @@ public class AdvancedTimer extends Timer{
    
    
     private List<TimerData> data;
-    public Callback updcallback;
-    public AdvancedTimer(long time, String name){
+    
+	public AdvancedTimer(long time, String name, String suffix){
 
-    	super(0,time,name);
-    	data =new ArrayList<TimerData>();
-    	synchronized(data) {
-    		
-    		data.add(new TimerData(0, name));
-        	this.setDuration(time);
-        	this.setName(name);
-    	}
-    	
-
-    }
+	super(0,time,name);
+	data =new ArrayList<TimerData>();
+	synchronized(data) {
+		
+		data.add(new TimerData(0, suffix));
+    	this.setDuration(time);
+    	this.setName(name);
+	}
+	}
     
     public synchronized Properties toProperties(String prefix) 
     {

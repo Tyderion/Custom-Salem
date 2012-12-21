@@ -11,7 +11,7 @@ public class TestClas {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Timer t = new AdvancedTimer(5000,"name");
+		Timer t = new AdvancedTimer(5000,"name", "suffix");
 		System.out.println(t.debug());
 		for (Timer e : TimerController.getInstance().timers)
 		{
